@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import { google } from "googleapis";
 import { getTranslations } from "next-intl/server";
 import { makeAuth } from "../../lib/google";
+
+export const metadata: Metadata = {
+  title:       "Commissions",
+  description: "Commission schedule, pricing, and process for MontBlanc — freelance illustrator.",
+  openGraph: {
+    title:       "MontBlanc — Commissions",
+    description: "Commission schedule, pricing, and process for MontBlanc — freelance illustrator.",
+  },
+  twitter: {
+    title:       "MontBlanc — Commissions",
+    description: "Commission schedule, pricing, and process for MontBlanc — freelance illustrator.",
+  },
+};
 
 const STATUS_MAP: Record<string, string> = {
   open:       "O",

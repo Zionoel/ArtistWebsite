@@ -1,6 +1,20 @@
+import type { Metadata } from "next";
 import { google } from "googleapis";
 import { getTranslations } from "next-intl/server";
 import { makeAuth, resolveDescriptions } from "../../lib/google";
+
+export const metadata: Metadata = {
+  title:       "Store",
+  description: "Prints, stickers, and original works by MontBlanc — available on Etsy, Redbubble, and Booth.",
+  openGraph: {
+    title:       "MontBlanc — Store",
+    description: "Prints, stickers, and original works by MontBlanc.",
+  },
+  twitter: {
+    title:       "MontBlanc — Store",
+    description: "Prints, stickers, and original works by MontBlanc.",
+  },
+};
 
 type StoreItem = {
   filename: string;

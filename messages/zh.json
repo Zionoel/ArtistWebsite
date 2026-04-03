@@ -1,5 +1,6 @@
 {
   "nav": {
+    "about": "关于",
     "portfolio": "作品集",
     "commission": "约稿",
     "store": "商店",
@@ -39,16 +40,35 @@
     "title": "联系",
     "name": "姓名",
     "namePlaceholder": "请输入您的姓名",
+    "companyName": "公司名称",
+    "companyNamePlaceholder": "公司名称（选填）",
     "email": "邮箱",
     "emailPlaceholder": "your@email.com",
+    "phone": "联系电话",
+    "phonePlaceholder": "+86 138 0000 0000",
+    "phoneHint": "请包含国家代码（例如：+86 中国，+82 韩国，+1 美国）",
     "subject": "咨询类型",
     "subjectDefault": "请选择类型",
     "subjectCommission": "约稿咨询",
     "subjectCommercial": "商业用途",
     "subjectOther": "其他",
+    "budget": "预算",
+    "budgetPlaceholder": "例如：$500（选填）",
+    "dueDate": "截止日期",
+    "displayRights": "作品展示授权",
+    "displayRightsLabel": "允许画师将此作品展示于个人作品集及社交媒体",
     "message": "留言",
     "messagePlaceholder": "请描述您的需求...",
-    "send": "发送"
+    "send": "发送",
+    "optional": "选填",
+    "sending": "发送中...",
+    "successMessage": "您的留言已成功发送，我将尽快与您联系。",
+    "errorMessage": "发送失败，请重试。"
+  },
+  "about": {
+    "title": "关于",
+    "socials": "社交媒体",
+    "timeline": "活动记录"
   },
   "store": {
     "title": "商店",

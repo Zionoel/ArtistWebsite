@@ -11,8 +11,19 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "MontBlanc",
-  description: "Freelance Illustrator",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  title: {
+    default:  "MontBlanc",
+    template: "%s — MontBlanc",
+  },
+  description: "Freelance illustrator specialising in character design and emotive illustration.",
+  openGraph: {
+    siteName: "MontBlanc",
+    type:     "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default async function LocaleLayout({
@@ -35,7 +46,8 @@ export default async function LocaleLayout({
           </Link>
           <div className="flex items-center gap-8">
             <div className="flex gap-8 text-sm">
-              <Link href={`/${locale}`} className="hover:text-white/50 transition-colors">{t("portfolio")}</Link>
+              <Link href={`/${locale}/about`} className="hover:text-white/50 transition-colors">{t("about")}</Link>
+              <Link href={`/${locale}/portfolio`} className="hover:text-white/50 transition-colors">{t("portfolio")}</Link>
               <Link href={`/${locale}/commission`} className="hover:text-white/50 transition-colors">{t("commission")}</Link>
               <Link href={`/${locale}/store`} className="hover:text-white/50 transition-colors">{t("store")}</Link>
               <Link href={`/${locale}/contact`} className="hover:text-white/50 transition-colors">{t("contact")}</Link>

@@ -1,5 +1,6 @@
 {
   "nav": {
+    "about": "について",
     "portfolio": "ポートフォリオ",
     "commission": "コミッション",
     "store": "ストア",
@@ -39,16 +40,35 @@
     "title": "お問い合わせ",
     "name": "お名前",
     "namePlaceholder": "お名前を入力してください",
+    "companyName": "会社名",
+    "companyNamePlaceholder": "会社名（任意）",
     "email": "メールアドレス",
     "emailPlaceholder": "your@email.com",
+    "phone": "電話番号",
+    "phonePlaceholder": "+81 90 1234 5678",
+    "phoneHint": "国番号を含めてご入力ください（例：+81 日本、+82 韓国）",
     "subject": "お問い合わせ種別",
     "subjectDefault": "種別を選択してください",
     "subjectCommission": "コミッションのご依頼",
     "subjectCommercial": "商業利用",
     "subjectOther": "その他",
+    "budget": "ご予算",
+    "budgetPlaceholder": "例：$500（任意）",
+    "dueDate": "納期希望日",
+    "displayRights": "作品掲載許可",
+    "displayRightsLabel": "作家がこの作品をポートフォリオおよびSNSに掲載することを許可する",
     "message": "メッセージ",
     "messagePlaceholder": "ご依頼内容をお聞かせください...",
-    "send": "送信"
+    "send": "送信",
+    "optional": "任意",
+    "sending": "送信中...",
+    "successMessage": "お問い合わせを受け付けました。近日中にご返答いたします。",
+    "errorMessage": "エラーが発生しました。もう一度お試しください。"
+  },
+  "about": {
+    "title": "について",
+    "socials": "SNS",
+    "timeline": "活動歴"
   },
   "store": {
     "title": "ストア",

@@ -1,5 +1,6 @@
 {
   "nav": {
+    "about": "소개",
     "portfolio": "포트폴리오",
     "commission": "커미션",
     "store": "스토어",
@@ -39,16 +40,35 @@
     "title": "문의",
     "name": "이름",
     "namePlaceholder": "이름을 입력해 주세요",
+    "companyName": "회사명",
+    "companyNamePlaceholder": "회사명 (선택사항)",
     "email": "이메일",
     "emailPlaceholder": "your@email.com",
+    "phone": "연락처",
+    "phonePlaceholder": "010-1234-5678",
+    "phoneHint": "해외에서 연락하시는 경우 국가 코드를 포함해 주세요 (예: +82)",
     "subject": "문의 유형",
     "subjectDefault": "유형을 선택해 주세요",
     "subjectCommission": "커미션 문의",
     "subjectCommercial": "상업적 사용",
     "subjectOther": "기타",
+    "budget": "예산",
+    "budgetPlaceholder": "예: $500 (선택사항)",
+    "dueDate": "마감일",
+    "displayRights": "작가 게재 권한",
+    "displayRightsLabel": "작가가 해당 작업물을 포트폴리오 및 SNS에 게재할 수 있습니다",
     "message": "내용",
     "messagePlaceholder": "작업에 대해 알려주세요...",
-    "send": "보내기"
+    "send": "보내기",
+    "optional": "선택",
+    "sending": "전송 중...",
+    "successMessage": "문의가 접수되었습니다. 빠른 시일 내에 답변 드리겠습니다.",
+    "errorMessage": "오류가 발생했습니다. 다시 시도해 주세요."
+  },
+  "about": {
+    "title": "소개",
+    "socials": "소셜 미디어",
+    "timeline": "활동 이력"
   },
   "store": {
     "title": "스토어",

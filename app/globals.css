@@ -5,3 +5,16 @@ body {
   background-color: #0a0a0a !important;
   color: #ededed;
 }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.animate-fade-in  { animation: fade-in  0.8s ease forwards; }
+.animate-fade-out { animation: fade-out 0.8s ease forwards; }
