@@ -50,18 +50,16 @@ export async function getAccessToken(email: string, privateKey: string): Promise
 
   const jwt = `${signingInput}.${b64urlBuf(signature)}`;
 
+  const oauthBody = `grant_type=urn%3Aietf%3Aparams%3Aoauth2%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`;
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth2:grant-type:jwt-bearer",
-      assertion:  jwt,
-    }).toString(),
+    body: oauthBody,
   });
 
-  const tokenData = await tokenRes.json() as { access_token?: string; error?: string };
+  const tokenData = await tokenRes.json() as { access_token?: string; error?: string; error_description?: string };
   if (tokenData.error || !tokenData.access_token) {
-    throw new Error(`Google OAuth error: ${tokenData.error ?? "no access_token"}`);
+    throw new Error(`Google OAuth error: ${tokenData.error} — ${tokenData.error_description ?? "no description"}`);
   }
   return tokenData.access_token;
 }
