@@ -50,7 +50,7 @@ export default async function Contact({ params }: { params: Promise<{ locale: st
   };
 
   return (
-    <div className="max-w-xl mx-auto px-8 py-16">
+    <div className="max-w-xl mx-auto px-4 md:px-8 py-16">
       <h1 className="text-2xl font-semibold mb-8">{t("title")}</h1>
       <ContactForm t={translations} />
     </div>

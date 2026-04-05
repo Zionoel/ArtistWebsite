@@ -163,7 +163,7 @@ export default async function Commission({ params }: { params: Promise<{ locale:
   ]);
 
   return (
-    <div className="max-w-2xl mx-auto px-8 py-16 space-y-12">
+    <div className="max-w-2xl mx-auto px-4 md:px-8 py-16 space-y-12">
 
       <h1 className="text-2xl font-semibold">{t("title")}</h1>
 

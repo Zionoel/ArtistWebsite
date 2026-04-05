@@ -131,7 +131,7 @@ export default async function AboutPage({
       </div>
 
       {/* ── Content: socials left | bio + timeline right ── */}
-      <div className="max-w-5xl mx-auto px-8 py-14 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-12">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-14 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-12">
 
         {/* Left — social links */}
         <aside className="space-y-2">
