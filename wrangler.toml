@@ -3,6 +3,13 @@ compatibility_date = "2024-12-30"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 main = ".open-next/worker.js"
 
+[vars]
+GOOGLE_SERVICE_ACCOUNT_EMAIL = "montblancserviceaccount@montblancweb.iam.gserviceaccount.com"
+GOOGLE_SHEETS_ID = "1L_Qr6VCUgRrUST2Q2L_PoVFi61EFGEs83XigCkjxai4"
+NEXT_PUBLIC_SITE_URL = "https://artbyblanc.com"
+NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAAC0E5bgIr895iBx5"
+R2_PUBLIC_URL = "https://pub-9d7f9d641748499a878db8325dc23dde.r2.dev"
+
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
