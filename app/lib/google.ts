@@ -56,7 +56,7 @@ export async function getAccessToken(email: string, privateKey: string): Promise
     body: new URLSearchParams({
       grant_type: "urn:ietf:params:oauth2:grant-type:jwt-bearer",
       assertion:  jwt,
-    }),
+    }).toString(),
   });
 
   const tokenData = await tokenRes.json() as { access_token?: string; error?: string };
