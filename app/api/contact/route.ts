@@ -1,4 +1,6 @@
 import { Resend } from "resend";
+
+export const runtime = 'edge';
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {

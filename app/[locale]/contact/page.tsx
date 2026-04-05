@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import ContactForm from "../../_components/ContactForm";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title:       "Contact",
   description: "Get in touch with MontBlanc for commission inquiries and commercial projects.",
