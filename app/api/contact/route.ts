@@ -1,5 +1,21 @@
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
+import { getAccessToken, sheetsGet } from "../../lib/google";
+
+async function getContactEmail(): Promise<string> {
+  const email      = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const sheetId    = process.env.GOOGLE_SHEETS_ID;
+  if (!email || !privateKey || !sheetId) return "wchanhe@gmail.com";
+  try {
+    const token = await getAccessToken(email, privateKey);
+    const rows  = await sheetsGet(token, sheetId, "About!A2:B50");
+    const row   = rows.find((r) => r[0]?.toLowerCase() === "contact_email");
+    return row?.[1]?.trim() || "wchanhe@gmail.com";
+  } catch {
+    return "wchanhe@gmail.com";
+  }
+}
 
 export async function POST(req: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -64,10 +80,12 @@ export async function POST(req: NextRequest) {
     </div>
   `;
 
+  const contactEmail = await getContactEmail();
+
   try {
     await resend.emails.send({
       from: "MontBlanc Contact <onboarding@resend.dev>",
-      to: "wchanhe@gmail.com",
+      to: contactEmail,
       replyTo: email,
       subject: [
         `[${subjectLabels[subject] ?? subject}]`,
