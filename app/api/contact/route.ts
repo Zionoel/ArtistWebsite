@@ -82,23 +82,23 @@ export async function POST(req: NextRequest) {
 
   const contactEmail = await getContactEmail();
 
-  try {
-    await resend.emails.send({
-      from: "MontBlanc Contact <onboarding@resend.dev>",
-      to: contactEmail,
-      replyTo: email,
-      subject: [
-        `[${subjectLabels[subject] ?? subject}]`,
-        name,
-        companyName ? `/ ${companyName}` : null,
-        dueDate ? `— Due: ${dueDate}` : null,
-      ].filter(Boolean).join(" "),
-      html,
-    });
+  const { error: sendError } = await resend.emails.send({
+    from: "MontBlanc Contact <onboarding@resend.dev>",
+    to: contactEmail,
+    replyTo: email,
+    subject: [
+      `[${subjectLabels[subject] ?? subject}]`,
+      name,
+      companyName ? `/ ${companyName}` : null,
+      dueDate ? `— Due: ${dueDate}` : null,
+    ].filter(Boolean).join(" "),
+    html,
+  });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Email send error:", error);
+  if (sendError) {
+    console.error("Email send error:", sendError);
     return NextResponse.json({ success: false }, { status: 500 });
   }
+
+  return NextResponse.json({ success: true });
 }
