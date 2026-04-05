@@ -1,10 +1,8 @@
 import { cache } from "react";
 import type { Metadata } from "next";
-import { google } from "googleapis";
-
 import Gallery, { type Work } from "../../_components/Gallery";
 import { getTranslations } from "next-intl/server";
-import { makeAuth, resolveDescriptions } from "../../lib/google";
+import { getAccessToken, sheetsGet, resolveDescriptions } from "../../lib/google";
 
 const getWorks = cache(async (locale: string): Promise<Work[]> => {
   const email      = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -21,27 +19,18 @@ const getWorks = cache(async (locale: string): Promise<Work[]> => {
     ];
   }
 
-  const auth = makeAuth(email, privateKey);
-  const sheets = google.sheets({ version: "v4", auth });
+  const token = await getAccessToken(email, privateKey);
 
   let rows: string[][] = [];
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "Portfolio!A2:E100",
-    });
-    rows = (res.data.values ?? []) as string[][];
+    rows = await sheetsGet(token, sheetId, "Portfolio!A2:E100");
   } catch {
     return [];
   }
 
-  // Portfolio sheet: A=filename, B=KO desc, C=EN, D=JA, E=ZH
   const descriptions = await resolveDescriptions(
-    rows, locale,
-    1,
-    { en: "C", ja: "D", zh: "E" },
-    "Portfolio",
-    sheets, sheetId, deeplKey
+    rows, locale, 1, { en: "C", ja: "D", zh: "E" },
+    "Portfolio", token, sheetId, deeplKey
   );
 
   return rows

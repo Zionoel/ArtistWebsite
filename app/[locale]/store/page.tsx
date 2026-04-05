@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { google } from "googleapis";
 import { getTranslations } from "next-intl/server";
-
-import { makeAuth, resolveDescriptions } from "../../lib/google";
+import { getAccessToken, sheetsGet, resolveDescriptions } from "../../lib/google";
 
 export const metadata: Metadata = {
   title:       "Store",
@@ -34,27 +32,18 @@ async function getStoreItems(locale: string): Promise<StoreItem[]> {
 
   if (!email || !privateKey || !sheetId || !r2Url) return [];
 
-  const auth = makeAuth(email, privateKey);
-  const sheets = google.sheets({ version: "v4", auth });
+  const token = await getAccessToken(email, privateKey);
 
   let rows: string[][] = [];
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "Store!A2:F100",
-    });
-    rows = (res.data.values ?? []) as string[][];
+    rows = await sheetsGet(token, sheetId, "Store!A2:F100");
   } catch {
     return [];
   }
 
-  // Store sheet: A=filename, B=link, C=KO desc, D=EN, E=JA, F=ZH
   const descriptions = await resolveDescriptions(
-    rows, locale,
-    2,
-    { en: "D", ja: "E", zh: "F" },
-    "Store",
-    sheets, sheetId, deeplKey
+    rows, locale, 2, { en: "D", ja: "E", zh: "F" },
+    "Store", token, sheetId, deeplKey
   );
 
   return rows

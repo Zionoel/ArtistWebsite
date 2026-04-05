@@ -2,8 +2,7 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { google } from "googleapis";
-import { makeAuth, resolveDescriptions } from "../../lib/google";
+import { getAccessToken, sheetsGet, resolveDescriptions } from "../../lib/google";
 import AboutCarousel from "../../_components/AboutCarousel";
 
 // ── icon labels for social platforms ─────────────────────────────────────────
@@ -37,87 +36,50 @@ const fetchAboutData = cache(async (locale: string) => {
     return { images: [], bio: "", socials: [], timeline: [] };
   }
 
-  const auth   = makeAuth(email, privateKey);
-  const sheets = google.sheets({ version: "v4", auth });
+  const token = await getAccessToken(email, privateKey);
 
   // ── Portfolio images (reuse existing sheet) ──────────────────────────────
   let images: string[] = [];
   if (r2Url) {
     try {
-      const res = await sheets.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        range: "Portfolio!A2:A100",
-      });
-      images = ((res.data.values ?? []) as string[][])
-        .map((r) => r[0]?.trim())
-        .filter(Boolean)
+      const rows = await sheetsGet(token, sheetId, "Portfolio!A2:A100");
+      images = rows.map((r) => r[0]?.trim()).filter(Boolean)
         .map((filename) => `${r2Url}/${encodeURIComponent(filename)}`);
-    } catch (e) { console.error('Google Sheets error (about):', e); }
+    } catch (e) { console.error("Google Sheets error (about):", e); }
   }
 
   // ── About sheet: A=field, B=ko, C=en, D=ja, E=zh ────────────────────────
   let bioText = "";
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "About!A2:E50",
-    });
-    const rows = (res.data.values ?? []) as string[][];
+    const rows = await sheetsGet(token, sheetId, "About!A2:E50");
     const bioRow = rows.find((r) => r[0]?.toLowerCase() === "bio");
-
     if (bioRow) {
-      // Wrap in array to reuse resolveDescriptions for single row
       const resolved = await resolveDescriptions(
-        [bioRow],
-        locale,
-        1,
-        { en: "C", ja: "D", zh: "E" },
-        "About",
-        sheets,
-        sheetId,
-        deeplKey
+        [bioRow], locale, 1, { en: "C", ja: "D", zh: "E" },
+        "About", token, sheetId, deeplKey
       );
       bioText = resolved[0] ?? "";
     }
-  } catch (e) { console.error('Google Sheets error (sheet):', e); }
+  } catch (e) { console.error("Google Sheets error (sheet):", e); }
 
   // ── Social sheet: A=platform, B=url ─────────────────────────────────────
   let socials: SocialLink[] = [];
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "Social!A2:B20",
-    });
-    socials = ((res.data.values ?? []) as string[][])
-      .filter((r) => r[0] && r[1])
+    const rows = await sheetsGet(token, sheetId, "Social!A2:B20");
+    socials = rows.filter((r) => r[0] && r[1])
       .map((r) => ({ platform: r[0].trim(), url: r[1].trim() }));
-  } catch (e) { console.error('Google Sheets error (sheet):', e); }
+  } catch (e) { console.error("Google Sheets error (sheet):", e); }
 
   // ── Timeline sheet: A=year, B=ko, C=en, D=ja, E=zh ──────────────────────
   let timeline: TimelineEntry[] = [];
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "Timeline!A2:E100",
-    });
-    const rows = ((res.data.values ?? []) as string[][]).filter((r) => r[0]);
-
+    const rows = (await sheetsGet(token, sheetId, "Timeline!A2:E100")).filter((r) => r[0]);
     const descriptions = await resolveDescriptions(
-      rows,
-      locale,
-      1,                               // KO at col B (index 1)
-      { en: "C", ja: "D", zh: "E" },
-      "Timeline",
-      sheets,
-      sheetId,
-      deeplKey
+      rows, locale, 1, { en: "C", ja: "D", zh: "E" },
+      "Timeline", token, sheetId, deeplKey
     );
-
-    timeline = rows.map((row, i) => ({
-      year:        row[0] ?? "",
-      description: descriptions[i] ?? "",
-    }));
-  } catch (e) { console.error('Google Sheets error (sheet):', e); }
+    timeline = rows.map((row, i) => ({ year: row[0] ?? "", description: descriptions[i] ?? "" }));
+  } catch (e) { console.error("Google Sheets error (sheet):", e); }
 
   return { images, bio: bioText, socials, timeline };
 });

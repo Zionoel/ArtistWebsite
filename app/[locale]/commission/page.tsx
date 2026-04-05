@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { google } from "googleapis";
 import { getTranslations } from "next-intl/server";
-import { makeAuth, resolveDescriptions } from "../../lib/google";
+import { getAccessToken, sheetsGet, resolveDescriptions } from "../../lib/google";
 
 export const metadata: Metadata = {
   title:       "Commissions",
@@ -35,16 +34,11 @@ async function getOfferings(locale: string): Promise<{ name: string; price: stri
 
   if (!email || !privateKey || !sheetId) return [];
 
-  const auth   = makeAuth(email, privateKey);
-  const sheets = google.sheets({ version: "v4", auth });
+  const token = await getAccessToken(email, privateKey);
 
   let rows: string[][] = [];
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "Offerings!A2:E100",
-    });
-    rows = (res.data.values ?? []) as string[][];
+    rows = await sheetsGet(token, sheetId, "Offerings!A2:E100");
   } catch {
     return [];
   }
@@ -52,7 +46,7 @@ async function getOfferings(locale: string): Promise<{ name: string; price: stri
   const names = await resolveDescriptions(
     rows, locale, 0,
     { en: "B", ja: "C", zh: "D" },
-    "Offerings", sheets, sheetId, deeplKey
+    "Offerings", token, sheetId, deeplKey
   );
 
   return rows.map((row, i) => ({
@@ -69,16 +63,11 @@ async function getProcess(locale: string): Promise<string[]> {
 
   if (!email || !privateKey || !sheetId) return [];
 
-  const auth   = makeAuth(email, privateKey);
-  const sheets = google.sheets({ version: "v4", auth });
+  const token = await getAccessToken(email, privateKey);
 
   let rows: string[][] = [];
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "Process!A2:D100",
-    });
-    rows = (res.data.values ?? []) as string[][];
+    rows = await sheetsGet(token, sheetId, "Process!A2:D100");
   } catch {
     return [];
   }
@@ -86,7 +75,7 @@ async function getProcess(locale: string): Promise<string[]> {
   return resolveDescriptions(
     rows, locale, 0,
     { en: "B", ja: "C", zh: "D" },
-    "Process", sheets, sheetId, deeplKey
+    "Process", token, sheetId, deeplKey
   );
 }
 
@@ -109,16 +98,11 @@ async function getSchedules(): Promise<ScheduleTable[]> {
     }];
   }
 
-  const auth = makeAuth(email, privateKey);
-  const sheets = google.sheets({ version: "v4", auth });
+  const token = await getAccessToken(email, privateKey);
 
   let rows: string[][] = [];
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "Schedule!A2:F100",
-    });
-    rows = (res.data.values ?? []) as string[][];
+    rows = await sheetsGet(token, sheetId, "Schedule!A2:F100");
   } catch {
     return [];
   }
