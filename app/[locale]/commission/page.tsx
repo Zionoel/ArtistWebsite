@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { google } from "googleapis";
 import { getTranslations } from "next-intl/server";
-import { makeAuth } from "../../lib/google";
+import { makeAuth, resolveDescriptions } from "../../lib/google";
 
 export const metadata: Metadata = {
   title:       "Commissions",
@@ -26,6 +26,69 @@ type ScheduleTable = {
   year: string;
   rows: { month: string; status: string }[];
 };
+
+async function getOfferings(locale: string): Promise<{ name: string; price: string }[]> {
+  const email      = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const sheetId    = process.env.GOOGLE_SHEETS_ID;
+  const deeplKey   = process.env.DEEPL_API_KEY;
+
+  if (!email || !privateKey || !sheetId) return [];
+
+  const auth   = makeAuth(email, privateKey);
+  const sheets = google.sheets({ version: "v4", auth });
+
+  let rows: string[][] = [];
+  try {
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "Offerings!A2:E100",
+    });
+    rows = (res.data.values ?? []) as string[][];
+  } catch {
+    return [];
+  }
+
+  const names = await resolveDescriptions(
+    rows, locale, 0,
+    { en: "B", ja: "C", zh: "D" },
+    "Offerings", sheets, sheetId, deeplKey
+  );
+
+  return rows.map((row, i) => ({
+    name:  names[i] || "",
+    price: row[4]?.trim() || "",
+  })).filter(item => item.name);
+}
+
+async function getProcess(locale: string): Promise<string[]> {
+  const email      = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const sheetId    = process.env.GOOGLE_SHEETS_ID;
+  const deeplKey   = process.env.DEEPL_API_KEY;
+
+  if (!email || !privateKey || !sheetId) return [];
+
+  const auth   = makeAuth(email, privateKey);
+  const sheets = google.sheets({ version: "v4", auth });
+
+  let rows: string[][] = [];
+  try {
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "Process!A2:D100",
+    });
+    rows = (res.data.values ?? []) as string[][];
+  } catch {
+    return [];
+  }
+
+  return resolveDescriptions(
+    rows, locale, 0,
+    { en: "B", ja: "C", zh: "D" },
+    "Process", sheets, sheetId, deeplKey
+  );
+}
 
 async function getSchedules(): Promise<ScheduleTable[]> {
   const email      = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -109,7 +172,11 @@ function ScheduleGrid({ table }: { table: ScheduleTable }) {
 export default async function Commission({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "commission" });
-  const schedules = await getSchedules();
+  const [schedules, offerings, steps] = await Promise.all([
+    getSchedules(),
+    getOfferings(locale),
+    getProcess(locale),
+  ]);
 
   return (
     <div className="max-w-2xl mx-auto px-8 py-16 space-y-12">
@@ -138,18 +205,12 @@ export default async function Commission({ params }: { params: Promise<{ locale:
         </h2>
         <table className="w-full text-sm">
           <tbody className="divide-y divide-white/10">
-            <tr>
-              <td className="py-2 text-white/80">{t("offering.illustration")}</td>
-              <td className="py-2 text-right text-white/50">{t("offering.fromPrice")}</td>
-            </tr>
-            <tr>
-              <td className="py-2 text-white/80">{t("offering.character")}</td>
-              <td className="py-2 text-right text-white/50">{t("offering.fromPrice")}</td>
-            </tr>
-            <tr>
-              <td className="py-2 text-white/80">{t("offering.commercial")}</td>
-              <td className="py-2 text-right text-white/50">{t("offering.inquire")}</td>
-            </tr>
+            {offerings.map((item, i) => (
+              <tr key={i}>
+                <td className="py-2 text-white/80">{item.name}</td>
+                <td className="py-2 text-right text-white/50">{item.price}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -160,10 +221,10 @@ export default async function Commission({ params }: { params: Promise<{ locale:
           {t("process.title")}
         </h2>
         <ol className="space-y-2 text-sm text-white/80">
-          {["step1", "step2", "step3", "step4"].map((step, i) => (
-            <li key={step} className="flex gap-3">
-              <span className="text-white/20 select-none">0{i + 1}</span>
-              {t(`process.${step}`)}
+          {steps.map((step, i) => (
+            <li key={i} className="flex gap-3">
+              <span className="text-white/20 select-none">{String(i + 1).padStart(2, "0")}</span>
+              {step}
             </li>
           ))}
         </ol>
