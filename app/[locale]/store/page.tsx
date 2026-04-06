@@ -68,11 +68,10 @@ async function getStoreItems(locale: string): Promise<StoreItem[]> {
 
 type StoreLink = { name: string; description: string; url: string };
 
-async function getStoreLinks(locale: string): Promise<StoreLink[]> {
+async function getStoreLinks(): Promise<StoreLink[]> {
   const email      = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
   const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
   const sheetId    = process.env.GOOGLE_SHEETS_ID;
-  const deeplKey   = process.env.DEEPL_API_KEY;
 
   if (!email || !privateKey || !sheetId) return [];
 
@@ -80,22 +79,17 @@ async function getStoreLinks(locale: string): Promise<StoreLink[]> {
 
   let rows: string[][] = [];
   try {
-    rows = await sheetsGet(token, sheetId, "StoreLinks!A2:F50");
+    rows = await sheetsGet(token, sheetId, "StoreLinks!A2:C50");
   } catch {
     return [];
   }
 
-  const descriptions = await resolveDescriptions(
-    rows, locale, 2, { en: "D", ja: "E", zh: "F" },
-    "StoreLinks", token, sheetId, deeplKey
-  );
-
   return rows
     .filter((r) => r[0]?.trim() && r[1]?.trim())
-    .map((row, i) => ({
+    .map((row) => ({
       name:        row[0].trim(),
       url:         row[1].trim(),
-      description: descriptions[i] ?? "",
+      description: row[2]?.trim() ?? "",
     }));
 }
 
@@ -104,7 +98,7 @@ export default async function Store({ params }: { params: Promise<{ locale: stri
   const t = await getTranslations({ locale, namespace: "store" });
   const [items, storeLinks] = await Promise.all([
     getStoreItems(locale),
-    getStoreLinks(locale),
+    getStoreLinks(),
   ]);
 
   return (
