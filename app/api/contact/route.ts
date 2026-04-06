@@ -103,10 +103,14 @@ export async function POST(req: NextRequest) {
   // Discord notification (best-effort — don't fail the request if it errors)
   const discordWebhook = process.env.DISCORD_WEBHOOK_URL;
   if (discordWebhook) {
+    const referer  = req.headers.get("referer") ?? "";
+    const locale   = referer.match(/\/([a-z]{2}(?:-[a-z]{2,4})?)\//i)?.[1] ?? "unknown";
+
     const fields = [
       { name: "Name",    value: name,                               inline: true },
       { name: "Email",   value: email,                              inline: true },
       { name: "Subject", value: subjectLabels[subject] ?? subject,  inline: true },
+      { name: "Language", value: locale,                            inline: true },
       companyName ? { name: "Company",  value: companyName,  inline: true } : null,
       phone       ? { name: "Phone",    value: phone,        inline: true } : null,
       budget      ? { name: "Budget",   value: budget,       inline: true } : null,
