@@ -83,11 +83,15 @@ async function sheetsBatchUpdate(
   data: { range: string; values: string[][] }[]
 ): Promise<void> {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchUpdate`;
-  await fetch(url, {
+  const res = await fetch(url, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ valueInputOption: "RAW", data }),
   });
+  if (!res.ok) {
+    const err = await res.text();
+    console.error("sheetsBatchUpdate failed:", res.status, err);
+  }
 }
 
 // ── DeepL ─────────────────────────────────────────────────────────────────────
