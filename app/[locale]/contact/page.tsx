@@ -59,7 +59,7 @@ export default async function Contact({ params }: { params: Promise<{ locale: st
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_160px] gap-12 items-start">
       <div>
       <h1 className="text-2xl font-semibold mb-8">{t("title")}</h1>
-      <ContactForm t={translations} />
+      <ContactForm t={translations} siteKey={process.env.TURNSTILE_SITE_KEY ?? ""} />
       </div>
 
       {news.length > 0 && (

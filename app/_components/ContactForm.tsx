@@ -14,7 +14,7 @@ declare global {
 const inputClass =
   "w-full border border-white/20 bg-transparent px-3 py-2 text-sm rounded focus:outline-none focus:border-white transition-colors placeholder:text-white/30";
 
-export default function ContactForm({ t }: { t: Translations }) {
+export default function ContactForm({ t, siteKey }: { t: Translations; siteKey: string }) {
   const [subject, setSubject] = useState("");
   const [displayRights, setDisplayRights] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -159,7 +159,7 @@ export default function ContactForm({ t }: { t: Translations }) {
       {/* Turnstile widget */}
       <div
         className="cf-turnstile"
-        data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+        data-sitekey={siteKey}
         data-theme="dark"
       />
       <Script
