@@ -106,17 +106,38 @@ export async function POST(req: NextRequest) {
     const referer  = req.headers.get("referer") ?? "";
     const locale   = referer.match(/\/([a-z]{2}(?:-[a-z]{2,4})?)\//i)?.[1] ?? "unknown";
 
+    // Translate message to Korean if it wasn't sent from the Korean page
+    let messageKo = "";
+    const deeplKey = process.env.DEEPL_API_KEY;
+    if (locale !== "ko" && deeplKey && message?.trim()) {
+      try {
+        const baseUrl = deeplKey.endsWith(":fx")
+          ? "https://api-free.deepl.com"
+          : "https://api.deepl.com";
+        const tlRes  = await fetch(`${baseUrl}/v2/translate`, {
+          method:  "POST",
+          headers: { Authorization: `DeepL-Auth-Key ${deeplKey}`, "Content-Type": "application/json" },
+          body:    JSON.stringify({ text: [message], target_lang: "KO" }),
+        });
+        const tlData = await tlRes.json() as { translations: { text: string }[] };
+        messageKo = tlData.translations?.[0]?.text ?? "";
+      } catch {
+        // translation failure is non-fatal
+      }
+    }
+
     const fields = [
-      { name: "Name",    value: name,                               inline: true },
-      { name: "Email",   value: email,                              inline: true },
-      { name: "Subject", value: subjectLabels[subject] ?? subject,  inline: true },
-      { name: "Language", value: locale,                            inline: true },
+      { name: "Name",     value: name,                               inline: true },
+      { name: "Email",    value: email,                              inline: true },
+      { name: "Subject",  value: subjectLabels[subject] ?? subject,  inline: true },
+      { name: "Language", value: locale,                             inline: true },
       companyName ? { name: "Company",  value: companyName,  inline: true } : null,
       phone       ? { name: "Phone",    value: phone,        inline: true } : null,
       budget      ? { name: "Budget",   value: budget,       inline: true } : null,
       dueDate     ? { name: "Due Date", value: dueDate,      inline: true } : null,
       { name: "Display Rights", value: displayRights ? "✓ Permitted" : "✗ Not permitted", inline: true },
-      { name: "Message", value: message.slice(0, 1024) },
+      { name: "Message",    value: message.slice(0, 1024) },
+      messageKo ? { name: "Message (KO)", value: messageKo.slice(0, 1024) } : null,
     ].filter(Boolean);
 
     fetch(discordWebhook, {
