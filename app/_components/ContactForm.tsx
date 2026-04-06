@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Script from "next/script";
 
 type Translations = Record<string, string>;
 
 declare global {
   interface Window {
-    turnstile?: { reset: (id?: string) => void };
+    turnstile?: {
+      render:  (container: HTMLElement, options: { sitekey: string; theme?: string }) => string;
+      remove:  (widgetId: string) => void;
+      reset:   (widgetId?: string) => void;
+    };
   }
 }
 
@@ -18,8 +22,35 @@ export default function ContactForm({ t, siteKey }: { t: Translations; siteKey: 
   const [subject, setSubject] = useState("");
   const [displayRights, setDisplayRights] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef  = useRef<string | null>(null);
 
   const showBudget = subject === "commission" || subject === "commercial";
+
+  // Render the Turnstile widget explicitly.
+  // On first page-load the Script onLoad callback handles it.
+  // On SPA navigation the script is already present, so useEffect handles it.
+  useEffect(() => {
+    if (!siteKey) return;
+
+    const render = () => {
+      if (containerRef.current && window.turnstile && !widgetIdRef.current) {
+        widgetIdRef.current = window.turnstile.render(containerRef.current, {
+          sitekey: siteKey,
+          theme:   "dark",
+        });
+      }
+    };
+
+    if (window.turnstile) render();
+
+    return () => {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
+    };
+  }, [siteKey]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -50,11 +81,11 @@ export default function ContactForm({ t, siteKey }: { t: Translations; siteKey: 
         setStatus("success");
       } else {
         setStatus("error");
-        window.turnstile?.reset();
+        if (widgetIdRef.current) window.turnstile?.reset(widgetIdRef.current);
       }
     } catch {
       setStatus("error");
-      window.turnstile?.reset();
+      if (widgetIdRef.current) window.turnstile?.reset(widgetIdRef.current);
     }
   }
 
@@ -156,15 +187,19 @@ export default function ContactForm({ t, siteKey }: { t: Translations; siteKey: 
         <p className="text-sm text-red-400">{t.errorMessage}</p>
       )}
 
-      {/* Turnstile widget */}
-      <div
-        className="cf-turnstile"
-        data-sitekey={siteKey}
-        data-theme="dark"
-      />
+      {/* Turnstile widget — explicit rendering via useEffect / onLoad */}
+      <div ref={containerRef} />
       <Script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-        strategy="lazyOnload"
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+        strategy="afterInteractive"
+        onLoad={() => {
+          if (containerRef.current && window.turnstile && !widgetIdRef.current) {
+            widgetIdRef.current = window.turnstile.render(containerRef.current, {
+              sitekey: siteKey,
+              theme:   "dark",
+            });
+          }
+        }}
       />
 
       <button
